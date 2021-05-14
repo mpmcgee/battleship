@@ -1,4 +1,5 @@
 package battleship;
+import java.lang.*;
 
 //player object
 public class Player {
@@ -88,11 +89,11 @@ public class Player {
     // creates a new player with a new fleet
     public void createFleet() {
 
-        Ship aircraftCarrier = new Ship("Aircraft Carrier", 5, 0);
-        Ship battleship = new Ship ("Battleship", 4, 0);
-        Ship submarine = new Ship ("Submarine", 3, 0);
-        Ship cruiser = new Ship ("Cruiser", 3, 0);
-        Ship destroyer = new Ship ("Destroyer", 2, 0);
+        Ship aircraftCarrier = new Ship("Aircraft Carrier", 5);
+        Ship battleship = new Ship ("Battleship", 4);
+        Ship submarine = new Ship ("Submarine", 3);
+        Ship cruiser = new Ship ("Cruiser", 3);
+        Ship destroyer = new Ship ("Destroyer", 2);
 
         Ship [] fleet = {aircraftCarrier, battleship, submarine, cruiser, destroyer};
 
@@ -100,16 +101,26 @@ public class Player {
     }
 
     public void placeShip(int rowStart, int colStart, int rowEnd, int colEnd, Ship ship) {
+        int[] shipCoords = new int[ship.getCells()];
         if (rowStart == rowEnd) {
             for (int i = colStart; i <= colStart + ship.getCells()-1; i++) {
                 this.battlefield[rowStart][i] = "O";
+
+                for (int j = 0; j <= ship.getCells()-1; j++) {
+                    shipCoords[j] = Integer.parseInt(String.valueOf(rowStart) + String.valueOf(i));
+                }
             }
             //vertical ships
         } else {
-            for (int i = rowStart; i < rowStart + ship.getCells(); i++) {
+            for (int i = rowStart; i <= rowStart + ship.getCells()-1; i++) {
                 this.battlefield[i][colStart] = "O";
+                for (int j = 0; j <= ship.getCells()-1; j++) {
+                    shipCoords[j] = Integer.parseInt(String.valueOf(i) + String.valueOf(colStart));
+                }
             }
         }
+
+        ship.setShipCoords(shipCoords);
 
     }
 

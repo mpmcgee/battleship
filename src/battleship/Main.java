@@ -6,6 +6,23 @@ import java.util.Scanner;
 
 public class Main {
 
+    public static boolean checkWin(Player player) {
+        int count = 0;
+        for (int i = 0; i <= 10; i++) {
+            for (int j = 0; j <= 10; j++) {
+                if (player.getBattlefield()[i][j].equals("O")) {
+                    count++;
+
+                }
+            }
+        }
+        if (count == 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public static boolean checkAvailable(int rowStart, int colStart, int rowEnd, int colEnd, String battlefield[][]) {
 
         //check to see that space is open
@@ -165,6 +182,7 @@ public class Main {
                     } else if (arrCoord[0].length() == 2) {
                         colStart = Integer.parseInt(String.valueOf(arrCoord[0].charAt(1)));
                     } else {
+
                         throw new ArrayIndexOutOfBoundsException();
 
                     }
@@ -240,13 +258,13 @@ public class Main {
 
 
                 } catch (ArrayIndexOutOfBoundsException e) {
-                    System.out.println("Error! Wrong ship location! Try again: \n");
+                    System.out.println("\nError! Wrong ship location! Try again: \n");
                 } catch (NumberFormatException e) {
-                    System.out.println("Please enter two coordinates in the correct range:\n");
+                    System.out.println("\nPlease enter two coordinates in the correct range:\n");
                 } catch (IllegalArgumentException e) {
-                    System.out.println("Error! Wrong length of the " + fleet[ship].getName() + "! Try again:\n");
+                    System.out.println("\nError! Wrong length of the " + fleet[ship].getName() + "! Try again:\n");
                 } catch(Exception e) {
-                    System.out.println("Error! You placed it too close to another one. Try again:\n");
+                    System.out.println("\nError! You placed it too close to another one. Try again:\n");
                 }
             }
         }
@@ -254,12 +272,46 @@ public class Main {
 
     }
 
+    public static int hitShip(Player player, int row, int col) {
+        int guessCoords = Integer.parseInt(String.valueOf(row) + String.valueOf(col));
+        Ship[] fleet = player.getShips();
+        for (int ship = 0; ship < fleet.length; ship++) {
+            int[] shipCoords = fleet[ship].getShipCoords();
+            for (int i = 0; i < fleet[ship].getCells(); i++) {
+                if (guessCoords == shipCoords[i]) {
+                    fleet[ship].setCellsHit(fleet[ship].getCellsHit() + 1);
+                    if (fleet[ship].getCellsHit() == fleet[ship].getCells()) {
+
+                        if (checkWin(player)) {
+                            player.printFogOfWar();
+                            return 0;
+
+                        } else {
+                            player.printFogOfWar();
+                            System.out.println("You sank a ship! Specify a new target:\n");
+                            return 0;
+
+                        }
+
+                    }
+                }
+            }
+        }
+        player.printFogOfWar();
+        System.out.println("You hit a ship! Try again:\n");
+        return 0;
+    }
+
+
+
+
+
     public static void takeShot(Player player) {
         boolean inputValid = false;
 
-        player.printFogOfWar();
 
-        System.out.println("Take a shot!");
+
+
 
         while (!inputValid) {
             int row;
@@ -285,18 +337,20 @@ public class Main {
                 if (player.getBattlefield()[row][col] == "O") {
                     player.updateBattlefield(row, col, "X");
                     player.updateFogOfWar(row, col, "X");
-                    player.printFogOfWar();
-                    System.out.println("You hit a ship!");
-                    player.printBattlefield();
+                    hitShip(player, row, col);
+                    inputValid = true;
+
 
                 } else if (player.getBattlefield()[row][col] == "~") {
                     player.updateBattlefield(row, col, "M");
                     player.updateFogOfWar(row, col, "M");
                     player.printFogOfWar();
                     System.out.println("You missed!");
-                    player.printBattlefield();
+                    inputValid = true;
 
                 } else {
+                    System.out.println("here");
+                    player.printFogOfWar();
                     throw new Exception();
                 }
 
@@ -320,6 +374,7 @@ public class Main {
     public static void main(String[] args) {
 
         //create players, boards, and fleets
+        boolean win = false;
         Player p1 = new Player();
         p1.createBattlefield();
         p1.createFogOfWar();
@@ -327,9 +382,18 @@ public class Main {
         //place ships
         placeShips(p1);
 
+
         //begin game
         System.out.println("The game starts!");
-        takeShot(p1);
+        p1.printFogOfWar();
+        System.out.println("Take a shot!\n");
+        while (!win) {
+            takeShot(p1);
+            win = checkWin(p1);
+        }
+
+        System.out.println("You sank the last ship. You won. Congratulations!");
+
     }
 }
 
